@@ -8,37 +8,37 @@ from items import Item
 import ui
 from performances import Performance
 from base import Base
-#from sqlalchemy import ForgeignKey
-# @event.listens_for(Engine, "connect")
-# def set_sqlite_pragma(dbapi_connection, connection_record):
-#     cursor = dbapi_connection.cursor()
-#     cursor.execute("PRAGMA foreign_keys=ON")
-#     cursor.close()
+
 engine = create_engine('sqlite:///tourMerchManagerDB.db', echo=False)
-#Base.metadata.create_all(engine)
+
 Session = sessionmaker(bind=engine)
 
 def setup():
+    #adds items to the items table
     save_session = Session()
     item1 = Item(description = 'White T-Shirt Logo', value = 25.95 )
     item2 = Item(description = 'White T-Shirt Photo', value = 25.95)
     item3 = Item(description = 'Concert DVD', value = 34.95)
     item4 = Item(description = 'Album 2016', value = 15.99)
     for item in [item1, item2, item3, item4]:
+        #ckecks that the item doesn't already exist before adding it again
         if not (getItem(item.description)):
             save_session.add(item)
     save_session.commit()
     save_session.close()
-
+#returns a list of objects to the function that called it
+#takes object type as an argument so it can handle all table queries
 def showAll(ObType):
     search_session = Session()
-    for ob in search_session.query(ObType).all():
-        print(ob)
+    obList = search_session.query(ObType).all()
     search_session.close()
-
+    return obList
+#adds objects to the database can process all classes in program
+#accepts validated data
 def addNewObject(ObTypeAdd, *args):
     save_session = Session()
     argList=[]
+    #converts arguments into a list for processing args by list index
     for arg in args:
         argList.append(arg)
     if (ObTypeAdd == 'Item'):
@@ -53,6 +53,7 @@ def addNewObject(ObTypeAdd, *args):
         save_session.add(sale)
     save_session.commit()
     save_session.close()
+#checks if an item is present in the database
 def getItem(string):
     search_session=Session()
     count = search_session.query(Item).filter_by(description = string).count()
@@ -62,40 +63,53 @@ def getItem(string):
     else:
         search_session.close()
         return False
+#returns an item or a performance object from the database
 def getObjectByID(objectTypeStr, aid):
 
     search_session=Session()
     while True:
         if (objectTypeStr == 'Item'):
             try:
+                #uses one beacuse it is querying by primary key
                 item = search_session.query(Item).filter_by(id = aid).one()
                 break
             except exc.SQLAlchemyError:
-                aid = ui.getPositiveInt(input('Please enter an ID from the list'))
+                #loops until it gets valid input
+                aid = ui.getPositiveInt(input('Please enter an ID from the list: '))
         elif (objectTypeStr == 'Performance'):
             try:
                 item = search_session.query(Performance).filter_by(id = aid).one()
                 break
             except exc.SQLAlchemyError:
-                aid = ui.getPositiveInt(input('Please enter an ID from the list'))
+                aid = ui.getPositiveInt(input('Please enter an ID from the list: '))
 
     search_session.close()
     return item
+#calculates the total sales
 def getSalesByID(iID):
     search_session = Session()
-    item = search_session.query(Item).filter_by(id = iID).one()
-    itemSales = search_session.query(Sale).filter_by(itemID = iID).all()
+    #gets item from database to access items value/validates user input
+    item = getObjectByID('Item', iID)
+    #gets all instances of sales that have received itemid as attribute
+    itemSales = search_session.query(Sale).filter_by(itemID = item.id).all()
     total = 0
     for sale in itemSales:
+        #item value stays the same for each sale object in list
         total += sale.quantity * item.value
     print ('Total sales for '+item.description+':')
     print ('$'+str(round(total, 2)))
     search_session.close()
+#calulates teh total sales by validated performanceID
 def getSalesByPerf(pID):
     search_session = Session()
-    perfSales = search_session.query(Sale).filter_by(performanceID = pID).all()
+    #vaildates user input to handle potential database query errors
+    perf = getObjectByID('Performance', pID)
+    #gets all sales instances with received performanceID as attribute
+    #uses perf incase passed argument is no longer applicable after data validation
+    perfSales = search_session.query(Sale).filter_by(performanceID = perf.id).all()
     total = 0
     for sale in perfSales:
+        #gets item as item is as there may be many different items sold as one performance
         item = search_session.query(Item).filter_by(id = sale.itemID).one()
         total += sale.quantity * item.value
     print ('Total sales for this performance:')

@@ -5,6 +5,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from base import Base
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
+#listens for db connections to enforce Foreign key ocnstraints
+#generates exception that can be handled
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
@@ -23,5 +25,6 @@ class Performance(Base):
     def __repr__(self):
         return 'Performance: ID: {} Location : {}, {} Date: {}-{}-{}'.format(self.id,
             self.locationCity, self.locationState, self.month, self.day, self.year)
+#updates the db schema to enforce foreign key constraints
 engine = create_engine('sqlite:///tourMerchManagerDB.db', echo=False)
 Base.metadata.create_all(engine)
