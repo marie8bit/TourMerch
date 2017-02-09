@@ -9,9 +9,9 @@ def handle_choice(choice):
     if choice == '2':
         ui.addNewItem()
     if choice == '3':
-        addPerf()
+        ui.addNewPerformance()
     if choice == '4':
-        addSale()
+        ui.addNewSale()
     if choice == '5':
         getTSpI()
     if choice == '6':

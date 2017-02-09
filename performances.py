@@ -14,4 +14,5 @@ class Performance(Base):
 
 
     def __repr__(self):
-        return 'Performance: ID: {} Location : {} Date: {}-{}-{}'.format(self.id, self.location, self.month, self.day, self.year)
+        return 'Performance: ID: {} Location : {}, {} Date: {}-{}-{}'.format(self.id,
+            self.locationCity, self.locationState, self.month, self.day, self.year)

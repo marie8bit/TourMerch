@@ -11,7 +11,7 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
-#Base.metadata.create_all(engine)
+
 class Item(Base):
     __tablename__ = 'items'
     id = Column(Integer, primary_key=True)
@@ -21,3 +21,5 @@ class Item(Base):
 
     def __repr__(self):
         return 'Item: ID: {} Description = {} Sales Price = {} '.format(self.id, self.description, self.value)
+engine = create_engine('sqlite:///tourMerchManagerDB.db', echo=True)
+Base.metadata.create_all(engine)

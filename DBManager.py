@@ -3,6 +3,10 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from merchSales import Sale
+from items import Item
+import items
+from performances import Performance
+from base import Base
 #from sqlalchemy import ForgeignKey
 # @event.listens_for(Engine, "connect")
 # def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -12,9 +16,7 @@ from merchSales import Sale
 engine = create_engine('sqlite:///tourMerchManagerDB.db', echo=True)
 #Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
-from items import Item
-from performances import Performance
-from base import Base
+
 def setup():
     save_session = Session()
     item1 = Item(description = 'White T-Shirt Logo', value = 25.95 )
@@ -33,19 +35,20 @@ def showAll(ObType):
         print(ob)
     search_session.close()
 
-def addNewObject(ObTypeAdd, **keywords):
+def addNewObject(ObTypeAdd, *args):
     save_session = Session()
-    if (type(ObTypeAdd) == Item):
-        item = Item(description = keywords[description], value = keywords[value])
+    argList=[]
+    for arg in args:
+        argList.append(arg)
+    if (ObTypeAdd == 'Item'):
+        item = Item(description = argList[0], value = argList[1])
         save_session.add(item)
-    elif (type(obTypeAdd)== Performance):
-        perf = Performance(year = keywords[year], month = keywords[month],
-            day = keywords[day], locationCity = keywords[locationCity],
-            locationState = keywords[locationState])
+    elif (ObTypeAdd == 'Performance'):
+        perf = Performance(year = argList[0], month = argList[1], day = argList[2],
+            locationCity = argList[3], locationState = argList[4])
         save_session.add(perf)
-    elif(type(obTypeAdd)== Sale):
-        sale = Sale(itemID = keywords[itemID], quantity = keywords[quantity],
-            performanceID = keywords[performanceID])
+    elif(ObTypeAdd == 'Sale'):
+        sale = Sale(itemID = argList[0], quantity = argList[1], performanceID = argList[2])
         save_session.add(sale)
     save_session.commit()
     save_session.close()
@@ -58,3 +61,8 @@ def getItem(string):
     else:
         search_session.close()
         return False
+def getItemByID(aid):
+    search_session=Session()
+    item = search_session.query(Item).filter_by(id = aid).one()
+    search_session.close()
+    return item
