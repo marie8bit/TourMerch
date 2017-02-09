@@ -1,10 +1,11 @@
 from sqlalchemy import create_engine
+from sqlalchemy import exc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from merchSales import Sale
 from items import Item
-import items
+import ui
 from performances import Performance
 from base import Base
 #from sqlalchemy import ForgeignKey
@@ -13,14 +14,14 @@ from base import Base
 #     cursor = dbapi_connection.cursor()
 #     cursor.execute("PRAGMA foreign_keys=ON")
 #     cursor.close()
-engine = create_engine('sqlite:///tourMerchManagerDB.db', echo=True)
+engine = create_engine('sqlite:///tourMerchManagerDB.db', echo=False)
 #Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
 def setup():
     save_session = Session()
     item1 = Item(description = 'White T-Shirt Logo', value = 25.95 )
-    item2 = Item(description = 'White T-Short Photo', value = 25.95)
+    item2 = Item(description = 'White T-Shirt Photo', value = 25.95)
     item3 = Item(description = 'Concert DVD', value = 34.95)
     item4 = Item(description = 'Album 2016', value = 15.99)
     for item in [item1, item2, item3, item4]:
@@ -61,8 +62,41 @@ def getItem(string):
     else:
         search_session.close()
         return False
-def getItemByID(aid):
+def getObjectByID(objectTypeStr, aid):
+
     search_session=Session()
-    item = search_session.query(Item).filter_by(id = aid).one()
+    while True:
+        if (objectTypeStr == 'Item'):
+            try:
+                item = search_session.query(Item).filter_by(id = aid).one()
+                break
+            except exc.SQLAlchemyError:
+                aid = ui.getPositiveInt(input('Please enter an ID from the list'))
+        elif (objectTypeStr == 'Performance'):
+            try:
+                item = search_session.query(Performance).filter_by(id = aid).one()
+                break
+            except exc.SQLAlchemyError:
+                aid = ui.getPositiveInt(input('Please enter an ID from the list'))
+
     search_session.close()
     return item
+def getSalesByID(iID):
+    search_session = Session()
+    item = search_session.query(Item).filter_by(id = iID).one()
+    itemSales = search_session.query(Sale).filter_by(itemID = iID).all()
+    total = 0
+    for sale in itemSales:
+        total += sale.quantity * item.value
+    print ('Total sales for '+item.description+':')
+    print ('$'+str(round(total, 2)))
+    search_session.close()
+def getSalesByPerf(pID):
+    search_session = Session()
+    perfSales = search_session.query(Sale).filter_by(performanceID = pID).all()
+    total = 0
+    for sale in perfSales:
+        item = search_session.query(Item).filter_by(id = sale.itemID).one()
+        total += sale.quantity * item.value
+    print ('Total sales for this performance:')
+    print ('$'+str(round(total, 2)))

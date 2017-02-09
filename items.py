@@ -21,5 +21,5 @@ class Item(Base):
 
     def __repr__(self):
         return 'Item: ID: {} Description = {} Sales Price = {} '.format(self.id, self.description, self.value)
-engine = create_engine('sqlite:///tourMerchManagerDB.db', echo=True)
+engine = create_engine('sqlite:///tourMerchManagerDB.db', echo=False)
 Base.metadata.create_all(engine)

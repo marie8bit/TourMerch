@@ -13,8 +13,8 @@ def handle_choice(choice):
     if choice == '4':
         ui.addNewSale()
     if choice == '5':
-        getTSpI()
+        ui.getTSpI()
     if choice == '6':
-        getTSpP()
+        ui.getTSpP()
     if choice == 'q':
         quit()

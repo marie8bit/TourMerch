@@ -76,13 +76,23 @@ def addNewPerformance():
 def addNewSale():
     DBManager.showAll(Item)
     iID = getPositiveInt(input('Enter the ID number of the item sold: '))
-    desc = DBManager.getItemByID(iID)
+    desc = DBManager.getObjectByID('Item', iID)
     item = desc.description
     iquantity = getPositiveInt(input('Enter the amount of '+ item +' sold: '))
     DBManager.showAll(Performance)
-    iperfID = getPositiveInt(input('Enter the ID of the performance the item(s) were sold: '))
-    DBManager.addNewObject('Sale', iID, iquantity, iperfID)
+    iperfID = getPositiveInt(input('Enter the ID of the performance where the item(s) were sold: '))
+    perf = DBManager.getObjectByID('Performance', iperfID)
+    DBManager.addNewObject('Sale', desc.id, iquantity, perf.id)
 
+def getTSpI():
+    DBManager.showAll(Item)
+    iID = getPositiveInt(input('Enter the ID number of the item: '))
+    DBManager.getSalesByID(iID)
+
+def getTSpP():
+    DBManager.showAll(Performance)
+    pID = getPositiveInt(input('Enter the ID number of the performance: '))
+    DBManager.getSalesByPerf(pID)
 
 if __name__ == '__main__':
     main()

@@ -9,9 +9,9 @@ from base import Base
 class Sale(Base):
     __tablename__ = 'sales'
     id = Column(Integer, primary_key=True)
-    itemID = Column(Integer, ForeignKey("items.id"))
+    itemID = Column(Integer, ForeignKey('items.id'))
     quantity = Column(Integer)
-    performanceID = Column(Integer, ForeignKey("performances.id"))
+    performanceID = Column(Integer, ForeignKey('performances.id'))
 
 
 
